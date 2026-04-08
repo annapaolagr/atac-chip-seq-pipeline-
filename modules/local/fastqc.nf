@@ -3,7 +3,7 @@ process FASTQC {
     label 'process_low'
 
     // Container specifico per la versione 0.12.1
-    container 'staphb/fastqc : 0.11.9'
+    container 'biocontainers/fastqc:v0.11.9_cv8'
 
     publishDir "${params.outdir}/fastqc", mode: 'copy'
 
