@@ -1,15 +1,21 @@
-nextflow.enable.dsl=2
+// Questo file importa i moduli e definisce la logica
+include { FASTQC     } from '../modules/local/fastqc.nf'
+include { TRIMGALORE } from '../modules/local/trimgalore.nf'
 
-// Importiamo il workflow dal file analysis.nf
-include { ATAC_CHIP_PIPELINE } from './workflows/analysis.nf'
+workflow ATAC_CHIP_PIPELINE {
+    take:
+    ch_input
 
-workflow {
-    // Creiamo il canale di input. 
-    // .fromFilePairs cerca coppie di file e 'name' diventa l'ID del campione.
-    ch_input = Channel
-        .fromFilePairs(params.input, checkIfExists: true)
-        .map { name, files -> [ [id:name], files ] }
+    main:
+    ch_versions = Channel.empty()
 
-    // Lanciamo la pipeline passandogli il canale
-    ATAC_CHIP_PIPELINE ( ch_input )
+    FASTQC ( ch_input )
+    ch_versions = ch_versions.mix(FASTQC.out.versions)
+
+    TRIMGALORE ( ch_input )
+    ch_versions = ch_versions.mix(TRIMGALORE.out.versions)
+
+    emit:
+    trimmed_reads = TRIMGALORE.out.reads
+    versions      = ch_versions
 }
