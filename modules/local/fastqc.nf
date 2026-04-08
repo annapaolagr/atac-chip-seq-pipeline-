@@ -1,8 +1,7 @@
 process FASTQC {
     tag "${meta.id}"
     label 'process_low'
-    container 'biocontainers/fastqc:v0.11.9_cv8'
-
+    container 'https://depot.galaxyproject.org/singularity/fastqc:0.11.9--0'
     publishDir "${params.outdir}/fastqc", mode: 'copy'
 
     input:
