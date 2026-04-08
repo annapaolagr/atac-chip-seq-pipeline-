@@ -1,8 +1,10 @@
 process FASTQC {
     tag "${meta.id}"
     label 'process_low'
-    container 'https://depot.galaxyproject.org/singularity/fastqc:0.11.9--0'
+    container "${ workflow.containerEngine == 'singularity' ? 'https://depot.galaxyproject.org/singularity/fastqc:0.11.9--0' : 'biocontainers/fastqc:v0.11.9_cv8' }"
+    
     publishDir "${params.outdir}/fastqc", mode: 'copy'
+
 
     input:
     tuple val(meta), path(reads)
