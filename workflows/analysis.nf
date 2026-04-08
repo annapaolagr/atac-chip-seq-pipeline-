@@ -1,7 +1,7 @@
 nextflow.enable.dsl=2
 
 // Importiamo il workflow dal file analysis.nf
-include { ATAC_CHIP_PIPELINE } from './workflows/analysis'
+include { ATAC_CHIP_PIPELINE } from './workflows/analysis.nf'
 
 workflow {
     // Creiamo il canale di input. 
