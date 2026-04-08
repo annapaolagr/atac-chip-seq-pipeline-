@@ -1,6 +1,6 @@
 // Importiamo i moduli locali
-include { FASTQC     } from '../modules/local/fastqc'
-include { TRIMGALORE } from '../modules/local/trimgalore'
+include { FASTQC     } from '../modules/local/fastqc.nf'
+include { TRIMGALORE } from '../modules/local/trimgalore.nf'
 
 workflow ATAC_CHIP_PIPELINE {
     take:
