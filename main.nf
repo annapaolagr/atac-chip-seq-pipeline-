@@ -1,24 +1,12 @@
-// Importiamo i moduli locali
-include { FASTQC     } from '../modules/local/fastqc.nf'
-include { TRIMGALORE } from '../modules/local/trimgalore.nf'
+nextflow.enable.dsl=2
 
-workflow ATAC_CHIP_PIPELINE {
-    take:
-    ch_input // Riceve il canale: [ [id:campione], [file1, file2] ]
+// Questo file chiama il workflow
+include { ATAC_CHIP_PIPELINE } from './workflows/analysis.nf'
 
-    main:
-    ch_versions = Channel.empty()
+workflow {
+    ch_input = Channel
+        .fromFilePairs(params.input, checkIfExists: true)
+        .map { name, files -> [ [id:name], files ] }
 
-    // 1. Eseguiamo FastQC sui dati grezzi
-    // Passiamo tutto l'oggetto ch_input (meta + file)
-    FASTQC ( ch_input )
-    ch_versions = ch_versions.mix(FASTQC.out.versions)
-
-    // 2. Eseguiamo TrimGalore per pulire le reads
-    TRIMGALORE ( ch_input )
-    ch_versions = ch_versions.mix(TRIMGALORE.out.versions)
-
-    emit:
-    trimmed_reads = TRIMGALORE.out.reads
-    versions      = ch_versions
+    ATAC_CHIP_PIPELINE ( ch_input )
 }
