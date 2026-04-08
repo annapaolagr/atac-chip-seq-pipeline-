@@ -1,7 +1,7 @@
 process TRIMGALORE {
     tag "${meta.id}"
     label 'process_high'
-    container 'biocontainers/trim-galore:0.6.6--0'
+   container 'https://depot.galaxyproject.org/singularity/trim-galore:0.6.6--0'
 
     publishDir "${params.outdir}/trimgalore", mode: 'copy'
 
