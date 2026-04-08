@@ -1,14 +1,15 @@
-// Importiamo il modulo FastQC
-include { FASTQC } from '../modules/local/fastqc'
+nextflow.enable.dsl=2
 
-workflow ATAC_CHIP_PIPELINE {
-    take:
-    ch_reads
+// Importiamo il workflow dal file analysis.nf
+include { ATAC_CHIP_PIPELINE } from './workflows/analysis'
 
-    main:
-    FASTQC(ch_reads)
+workflow {
+    // Creiamo il canale di input. 
+    // .fromFilePairs cerca coppie di file e 'name' diventa l'ID del campione.
+    ch_input = Channel
+        .fromFilePairs(params.input, checkIfExists: true)
+        .map { name, files -> [ [id:name], files ] }
 
-    emit:
-    html = FASTQC.out.html
-    versions = FASTQC.out.versions
+    // Lanciamo la pipeline passandogli il canale
+    ATAC_CHIP_PIPELINE ( ch_input )
 }
