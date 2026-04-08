@@ -1,5 +1,5 @@
-// Questo file importa i moduli e definisce la logica
 include { FASTQC     } from '../modules/local/fastqc.nf'
+include { TRIMGALORE } from '../modules/local/trimgalore.nf' 
 
 workflow ATAC_CHIP_PIPELINE {
     take:
@@ -8,11 +8,16 @@ workflow ATAC_CHIP_PIPELINE {
     main:
     ch_versions = Channel.empty()
 
+    // 1. Esegui FASTQC
     FASTQC ( ch_input )
     ch_versions = ch_versions.mix(FASTQC.out.versions)
 
-   
+    // 2. Esegui TrimGalore
+    TRIMGALORE ( ch_input )
+    ch_versions = ch_versions.mix(TRIMGALORE.out.versions)
 
     emit:
-    versions      = ch_versions
+    // Ora l'output della pipeline saranno le reads pulite
+    reads    = TRIMGALORE.out.reads
+    versions = ch_versions
 }
