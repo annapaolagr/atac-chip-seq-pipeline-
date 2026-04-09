@@ -19,7 +19,7 @@ workflow {
     }
 
     // Creiamo un canale 'valore' per l'indice (perché è uno solo per tutti i campioni)
-    ch_index = Channel.value(file(index_path))
+    ch_index = Channel.value(file(index_path, type: 'dir', checkIfExists: true))
 
     // 3. Lanciamo il workflow passando sia le reads che l'indice
     ATAC_CHIP_PIPELINE ( ch_input, ch_index )
