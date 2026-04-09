@@ -3,7 +3,7 @@ process SAMTOOLS_SORT {
     label 'process_medium'
     publishDir "${params.outdir}/bams", mode: 'copy'
 
-    container 'community.wave.seqera.io/library/samtools:1.19.2--13401567ef54084f'
+    container 'quay.io/biocontainers/samtools:1.19.2--h50ea8bc_0'
 
     input:
     tuple val(meta), path(sam)
