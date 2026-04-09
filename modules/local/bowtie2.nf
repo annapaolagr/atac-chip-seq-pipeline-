@@ -1,8 +1,9 @@
 process BOWTIE2 {
     tag "$meta.id"
-    label 'process_high' // Per usare le risorse (CPU/RAM) del config
-
-    container 'community.wave.seqera.io/library/bowtie2:2.5.2--069a6572f98650df'
+    label 'process_high'
+    
+    // Container stabile da Quay.io
+    container 'quay.io/biocontainers/bowtie2:2.5.2--py310h0854694_0'
 
     input:
     tuple val(meta), path(reads)
@@ -11,13 +12,12 @@ process BOWTIE2 {
     output:
     tuple val(meta), path("*.sam"), emit: sam
     tuple val(meta), path("*.log"), emit: log
-    // Aggiungiamo anche le versioni (buona pratica nf-core)
-    path  "versions.yml"          , emit: versions
+    path "versions.yml"           , emit: versions
 
     script:
     def prefix = "${meta.id}_aln"
     """
-    # Individua il basename dell'indice (funziona con hg38, mm10, o genome)
+    # Individua il basename dell'indice
     INDEX_BASE=\$(ls ${index_dir}/*.1.bt2 | sed 's/\\.1\\.bt2//')
 
     bowtie2 \\
