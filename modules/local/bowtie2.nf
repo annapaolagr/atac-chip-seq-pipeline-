@@ -2,8 +2,8 @@ process BOWTIE2 {
     tag "$meta.id"
     label 'process_high'
     
-    // Container stabile da Quay.io
-    container 'quay.io/biocontainers/bowtie2:2.5.2--py310h0854694_0'
+    // Proviamo questo tag che è molto diffuso e stabile
+    container 'quay.io/biocontainers/bowtie2:2.5.1--py310h7d750c5_0'
 
     input:
     tuple val(meta), path(reads)
@@ -17,7 +17,8 @@ process BOWTIE2 {
     script:
     def prefix = "${meta.id}_aln"
     """
-    # Individua il basename dell'indice
+    # Individuiamo il basename dell'indice
+    # Usiamo \$ per indicare a Nextflow che queste sono variabili Bash
     INDEX_BASE=\$(ls ${index_dir}/*.1.bt2 | sed 's/\\.1\\.bt2//')
 
     bowtie2 \\
