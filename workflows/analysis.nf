@@ -2,7 +2,7 @@
 include { FASTQC }         from '../modules/local/fastqc.nf'
 include { TRIMGALORE }     from '../modules/local/trimgalore.nf'
 include { BOWTIE2 }        from '../modules/local/bowtie2.nf'
-include { SAMTOOLS_SORT }  from '../modules/local/samtools.nf'
+include { SAMTOOLS_SORT }  from '../modules/local/samtools_sort.nf'
 
 workflow ATAC_CHIP_PIPELINE {
     take:
