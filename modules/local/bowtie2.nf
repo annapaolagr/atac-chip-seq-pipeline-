@@ -3,7 +3,7 @@ process BOWTIE2 {
     label 'process_high'
     
     // Proviamo questo tag che è molto diffuso e stabile
-    container 'quay.io/biocontainers/bowtie2:2.5.1--py310h7d750c5_0'
+    container 'biocontainers/bowtie2:v2.4.1_cv1'
 
     input:
     tuple val(meta), path(reads)
