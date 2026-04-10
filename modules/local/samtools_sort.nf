@@ -4,7 +4,7 @@ process SAMTOOLS_SORT {
     publishDir "${params.outdir}/bams", mode: 'copy'
 
     // Usiamo DockerHub per evitare errori di permessi su Quay.io
-    container 'quay.io/biocontainers/samtools:v1.16.1'
+    container 'staphb/samtools:1.16.1'
 
     input:
     // Riceve il file .sam dal modulo Bowtie2
