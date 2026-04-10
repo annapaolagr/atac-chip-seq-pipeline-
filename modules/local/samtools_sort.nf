@@ -3,25 +3,26 @@ process SAMTOOLS_SORT {
     label 'process_medium'
     publishDir "${params.outdir}/bams", mode: 'copy'
 
-    container 'quay.io/biocontainers/samtools:1.19.2--h50ea8bc_0'
+    // Usiamo DockerHub per evitare errori di permessi su Quay.io
+    container 'biocontainers/samtools:v1.9-4-deb_cv1'
 
     input:
-    // Cambiato da 'path(sam)' a 'path(bam)' perché Bowtie2 ora sputa BAM
-    tuple val(meta), path(bam)
+    // Riceve il file .sam dal modulo Bowtie2
+    tuple val(meta), path(sam)
 
     output:
-    tuple val(meta), path("*.sorted.bam")    , emit: bam
-    tuple val(meta), path("*.sorted.bam.bai"), emit: bai 
-    path "versions.yml"                      , emit: versions
+    tuple val(meta), path("*.sorted.bam")     , emit: bam
+    tuple val(meta), path("*.sorted.bam.bai") , emit: bai 
+    path "versions.yml"                       , emit: versions
 
     script:
     def prefix = "${meta.id}"
     """
-    # Ordiniamo direttamente il file BAM grezzo
-    # Usiamo -@ $task.cpus per parallelizzare il sorting (fondamentale per la velocità!)
-    samtools sort -@ $task.cpus -o ${prefix}.sorted.bam $bam
+    # 1. Converte SAM in BAM, ordina e salva in un colpo solo
+    # Usiamo -@ $task.cpus per usare tutta la potenza che abbiamo dato nel config
+    samtools sort -@ $task.cpus -o ${prefix}.sorted.bam $sam
     
-    # Crea l'indice del file BAM ordinato
+    # 2. Crea l'indice del file BAM (genera il file .bai)
     samtools index -@ $task.cpus ${prefix}.sorted.bam
 
     cat <<-END_VERSIONS > versions.yml
