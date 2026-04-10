@@ -1,10 +1,13 @@
 process FASTQC {
     tag "${meta.id}"
     label 'process_low'
-    container "${ workflow.containerEngine == 'singularity' ? 'https://depot.galaxyproject.org/singularity/fastqc:0.11.9--0' : 'biocontainers/fastqc:v0.11.9_cv8' }"
+    
+    // Usiamo quay.io che è lo standard di nf-core, più stabile di DockerHub
+    container "${ workflow.containerEngine == 'singularity' ? 
+        'https://depot.galaxyproject.org/singularity/fastqc:0.12.1--hdfd78af_0' : 
+        'quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0' }"
     
     publishDir "${params.outdir}/fastqc", mode: 'copy'
-
 
     input:
     tuple val(meta), path(reads)
@@ -15,7 +18,6 @@ process FASTQC {
     path  "versions.yml"           , emit: versions
 
     script:
-    // Usiamo $reads: Nextflow espanderà automaticamente tutti i file della coppia
     """
     fastqc $reads
     
