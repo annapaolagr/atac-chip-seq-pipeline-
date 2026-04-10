@@ -1,3 +1,4 @@
+
 // 1. Importazione dei moduli
 include { FASTQC }         from '../modules/local/fastqc.nf'
 include { TRIMGALORE }     from '../modules/local/trimgalore.nf'
@@ -21,13 +22,13 @@ workflow ATAC_CHIP_PIPELINE {
     ch_versions = ch_versions.mix(TRIMGALORE.out.versions)
 
     // 3. Allineamento con Bowtie2
-    // NOTA: Abbiamo modificato il modulo per emettere 'sam' (per stabilità Docker)
+    // Ora il modulo emette direttamente il file .bam tramite pipe
     BOWTIE2 ( TRIMGALORE.out.reads, ch_index )
     ch_versions = ch_versions.mix(BOWTIE2.out.versions)
 
     // 4. Ordinamento e indicizzazione
-    // MODIFICATO: Usiamo .out.sam perché è quello che Bowtie2 emette ora
-    SAMTOOLS_SORT ( BOWTIE2.out.sam )
+    // Collegamento aggiornato: usiamo .out.bam (quello emesso da BOWTIE2)
+    SAMTOOLS_SORT ( BOWTIE2.out.bam )
     ch_versions = ch_versions.mix(SAMTOOLS_SORT.out.versions)
 
     emit:
