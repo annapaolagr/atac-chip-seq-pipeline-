@@ -2,26 +2,26 @@ process BOWTIE2 {
     tag "$meta.id"
     label 'process_high'
     
-    // Usiamo quay.io che è più veloce di DockerHub nel pull iniziale
-    container 'quay.io/biocontainers/bowtie2:2.5.2--py310h7d7f7ad_0'
+    // Cambiamo il container in uno che ha SIA Bowtie2 SIA Samtools (fondamentale per nf-core style)
+    container 'https://depot.galaxyproject.org/singularity/mulled-v2-ac74a7f022a66a41e76620ca557f146999fa9365:f0c6ceaf69cf66133496c6a66160938479e00661-0'
 
     input:
     tuple val(meta), path(reads)
     path index_dir 
 
     output:
-    // NOTA: Cambiamo l'output in BAM, è molto più leggero e veloce da gestire
-    tuple val(meta), path("*.bam"), emit: bam
-    tuple val(meta), path("*.log"), emit: log
-    path "versions.yml"           , emit: versions
+    tuple val(meta), path("*.raw.bam"), emit: bam
+    tuple val(meta), path("*.log")    , emit: log
+    path "versions.yml"               , emit: versions
 
     script:
     def prefix = "${meta.id}_aln"
     """
-    # Individuiamo il basename dell'indice
+    # 1. Trova il basename dell'indice
     INDEX_BASE=\$(ls ${index_dir}/*.1.bt2 | head -n 1 | sed 's/\\.1\\.bt2//')
 
-    # Allineamento e conversione immediata in BAM (senza scrivere il SAM sul disco)
+    # 2. Allineamento e conversione in BAM. 
+    # Grazie al 'pipefail' nel config, se bowtie2 fallisce, l'intera pipeline si ferma correttamente.
     bowtie2 \\
         -x \$INDEX_BASE \\
         -1 ${reads[0]} \\
