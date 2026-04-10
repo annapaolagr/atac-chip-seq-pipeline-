@@ -3,7 +3,7 @@ process BOWTIE2 {
     label 'process_high'
     
     // Cambiamo il container in uno che ha SIA Bowtie2 SIA Samtools (fondamentale per nf-core style)
-   container 'quay.io/biocontainers/mulled-v2-ac74a7f022a66a41e76620ca557f146999fa9365:f0c6ceaf69cf66133496c6a66160938479e00661-0'
+   container 'community.wave.seqera.io/library/bowtie2_samtools:f717904071306e98'
 
     input:
     tuple val(meta), path(reads)
