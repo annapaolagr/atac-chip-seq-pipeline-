@@ -3,9 +3,7 @@ process FASTQC {
     label 'process_low'
     
     // Usiamo quay.io che è lo standard di nf-core, più stabile di DockerHub
-    container "${ workflow.containerEngine == 'singularity' ? 
-        'https://depot.galaxyproject.org/singularity/fastqc:0.12.1--hdfd78af_0' : 
-        'quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0' }"
+    container 'quay.io/biocontainers/fastqc:0.12.1--hdfd78af_0'
     
     publishDir "${params.outdir}/fastqc", mode: 'copy'
 
