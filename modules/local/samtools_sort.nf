@@ -6,21 +6,23 @@ process SAMTOOLS_SORT {
     container 'quay.io/biocontainers/samtools:1.19.2--h50ea8bc_0'
 
     input:
-    tuple val(meta), path(sam)
+    // Cambiato da 'path(sam)' a 'path(bam)' perché Bowtie2 ora sputa BAM
+    tuple val(meta), path(bam)
 
     output:
     tuple val(meta), path("*.sorted.bam")    , emit: bam
-    tuple val(meta), path("*.sorted.bam.bai"), emit: bai // Modificato per chiarezza
+    tuple val(meta), path("*.sorted.bam.bai"), emit: bai 
     path "versions.yml"                      , emit: versions
 
     script:
     def prefix = "${meta.id}"
     """
-    # Trasforma SAM in BAM, ordina e salva
-    samtools view -bS $sam | samtools sort -@ $task.cpus -o ${prefix}.sorted.bam -
+    # Ordiniamo direttamente il file BAM grezzo
+    # Usiamo -@ $task.cpus per parallelizzare il sorting (fondamentale per la velocità!)
+    samtools sort -@ $task.cpus -o ${prefix}.sorted.bam $bam
     
-    # Crea l'indice del file BAM
-    samtools index ${prefix}.sorted.bam
+    # Crea l'indice del file BAM ordinato
+    samtools index -@ $task.cpus ${prefix}.sorted.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
