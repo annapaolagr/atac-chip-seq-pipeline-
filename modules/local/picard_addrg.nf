@@ -3,7 +3,7 @@ process PICARD_ADDRG {
     container 'broadinstitute/picard:2.27.4'
 
     input:
-    tuple val(meta), path(bam) // Riceve il file da BOWTIE2
+    tuple val(meta), path(bam) 
 
     output:
     tuple val(meta), path("*_corrected.bam"), emit: bam
