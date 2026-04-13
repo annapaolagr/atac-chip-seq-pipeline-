@@ -4,8 +4,11 @@ process SAMTOOLS_SORT {
 
     container 'staphb/samtools:1.16.1'
 
+    // Pubblichiamo il risultato finale ordinato e indicizzato
+    publishDir "${params.outdir}/final_bams", mode: 'copy'
+
     input:
-    tuple val(meta), path(bam)
+    tuple val(meta), path(bam) // Qui riceverà il file *_removed.bam da Picard
 
     output:
     tuple val(meta), path("*.sorted.bam") , emit: bam
@@ -13,16 +16,18 @@ process SAMTOOLS_SORT {
     path "versions.yml"                   , emit: versions
 
     script:
-    def prefix = "${meta.id}.sorted"
+    // Cambiamo il prefisso in .final o lasciamo .sorted 
+    // per distinguere l'output definitivo
+    def prefix = "${meta.id}.final"
   
     """
     samtools sort \\
         -@ $task.cpus \\
         -m 2G \\
-        -o ${prefix}.bam \\
+        -o ${prefix}.sorted.bam \\
         $bam
 
-    samtools index -@ $task.cpus ${prefix}.bam
+    samtools index -@ $task.cpus ${prefix}.sorted.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
