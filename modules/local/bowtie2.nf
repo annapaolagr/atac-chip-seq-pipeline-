@@ -14,14 +14,15 @@ process BOWTIE2 {
     path "versions.yml"               , emit: versions
 
     script:
-    // Cambiato il prefisso per essere sicuri che sia unico
     def prefix = "${meta.id}_aln"
     """
-    # Identifica la base dell'indice
-    INDEX_BASE=\$(ls ${index_dir}/*.1.bt2 | head -n 1 | sed 's/\\.1\\.bt2//')
+    # 1. Identifica la base dell'indice (Logica robusta stile nf-core)
+    INDEX_BASE=`find -L ${index_dir} -name "*.1.bt2" | sed "s/\\.1\\.bt2\$//"`
 
-    # Allineamento: rimosso --rg per lasciare spazio a Picard.
-    # Usiamo -u in samtools per generare un BAM non compresso (più veloce da passare al processo dopo)
+    # 2. Allineamento ottimizzato:
+    # --no-mixed --no-discordant: evita di generare allineamenti parziali "spazzatura"
+    # -F 4: scarta le reads non mappate (riduce drasticamente i 18GB di BAM)
+    # tee: scrive il log in tempo reale per monitorare l'avanzamento
     bowtie2 \\
         -x \$INDEX_BASE \\
         -1 ${reads[0]} \\
@@ -29,13 +30,15 @@ process BOWTIE2 {
         -p $task.cpus \\
         --very-sensitive \\
         -X 2000 \\
-        2> ${prefix}.bowtie2.log \\
-        | samtools view -@ $task.cpus -u - > ${prefix}.raw.bam
+        --no-mixed \\
+        --no-discordant \\
+        2> >(tee ${prefix}.bowtie2.log >&2) \\
+        | samtools view -@ $task.cpus -u -F 4 -b - > ${prefix}.raw.bam
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         bowtie2: \$(echo \$(bowtie2 --version 2>&1) | sed 's/^.*bowtie2-align-s version //; s/ .*\$//')
-        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/ .*\$//')
+        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
     END_VERSIONS
     """
 }
