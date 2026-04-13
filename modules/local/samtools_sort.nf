@@ -14,8 +14,14 @@ process SAMTOOLS_SORT {
 
     script:
     def prefix = "${meta.id}.sorted"
+  
     """
-    samtools sort -@ $task.cpus -o ${prefix}.bam $bam
+    samtools sort \\
+        -@ $task.cpus \\
+        -m 2G \\
+        -o ${prefix}.bam \\
+        $bam
+
     samtools index -@ $task.cpus ${prefix}.bam
 
     cat <<-END_VERSIONS > versions.yml
