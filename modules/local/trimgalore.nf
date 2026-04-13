@@ -2,10 +2,8 @@ process TRIMGALORE {
     tag "${meta.id}"
     label 'process_high' 
 
-    // Container stabile di Biocontainers
     container 'quay.io/biocontainers/trim-galore:0.6.10--hdfd78af_0'
 
-    // Usiamo 'copy' per avere i file finali, ma puoi usare 'link' per test più veloci
     publishDir "${params.outdir}/trimgalore", mode: 'copy'
 
     input:
