@@ -2,10 +2,10 @@ process TRIMGALORE {
     tag "${meta.id}"
     label 'process_high' 
 
+    // Container stabile di Biocontainers
     container 'quay.io/biocontainers/trim-galore:0.6.10--hdfd78af_0'
 
-    // NOTA: Se vuoi velocità massima, sposta publishDir nel nextflow.config 
-    // o usa mode: 'link' per non perdere tempo a copiare i file
+    // Usiamo 'copy' per avere i file finali, ma puoi usare 'link' per test più veloci
     publishDir "${params.outdir}/trimgalore", mode: 'copy'
 
     input:
@@ -17,20 +17,11 @@ process TRIMGALORE {
     path "versions.yml"                           , emit: versions
 
     script:
-    // 1. LOGICA NF-CORE PER I CORES
-    // Trim Galore lancia Cutadapt e pigz. 
-    // Se assegni 8 CPU nel config, questa formula dice a Trim Galore di usarne 
-    // 4 per Cutadapt/pigz, che è il setup più veloce possibile.
-    def cores = 1
-    if (task.cpus > 1) {
-        cores = (task.cpus / 4) as int
-        if (cores < 1) cores = 1
-    }
-    
-    def args = task.ext.args ?: ''
+    // SETTAGGIO TURBO: Forziamo 4 core per Cutadapt/Pigz. 
+    // Nota: Trim Galore utilizzerà internamente fino a 7-8 CPU totali.
+    def cores = 4
     """
     trim_galore \\
-        $args \\
         --cores $cores \\
         --paired \\
         --gzip \\
