@@ -14,11 +14,14 @@ process BOWTIE2 {
     path "versions.yml"               , emit: versions
 
     script:
+    // Cambiato il prefisso per essere sicuri che sia unico
     def prefix = "${meta.id}_aln"
     """
+    # Identifica la base dell'indice
     INDEX_BASE=\$(ls ${index_dir}/*.1.bt2 | head -n 1 | sed 's/\\.1\\.bt2//')
 
-    # Rimosse le opzioni --rg per permettere a Picard di aggiungerle dopo
+    # Allineamento: rimosso --rg per lasciare spazio a Picard.
+    # Usiamo -u in samtools per generare un BAM non compresso (più veloce da passare al processo dopo)
     bowtie2 \\
         -x \$INDEX_BASE \\
         -1 ${reads[0]} \\
