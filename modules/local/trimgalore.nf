@@ -25,7 +25,6 @@ process TRIMGALORE {
         --cores $cores \\
         --paired \\
         --gzip \\
-        --no_report_if_cutadapt_not_found \\
         ${reads[0]} \\
         ${reads[1]}
 
