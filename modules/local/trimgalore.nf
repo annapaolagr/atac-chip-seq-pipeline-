@@ -17,9 +17,7 @@ process TRIMGALORE {
     path "versions.yml"                           , emit: versions
 
     script:
-    // SETTAGGIO TURBO: Forziamo 4 core per Cutadapt/Pigz. 
-    // Nota: Trim Galore utilizzerà internamente fino a 7-8 CPU totali.
-    def cores = 4
+   def cores = task.cpus ?: 8
     """
     trim_galore \\
         --cores $cores \\
