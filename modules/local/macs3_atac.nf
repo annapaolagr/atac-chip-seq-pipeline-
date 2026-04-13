@@ -2,7 +2,7 @@ process MACS3_ATAC {
     tag "$meta.id"
     label 'process_medium'
     
-    container 'biocontainers/macs3:3.0.0b1-1_cv1'
+    container 'quay.io/biocontainers/macs3:3.0.0b1--py310h0db0f3a_1'
 
     publishDir "${params.outdir}/peaks", mode: 'copy'
 
