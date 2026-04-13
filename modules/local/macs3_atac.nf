@@ -7,7 +7,8 @@ process MACS3_ATAC {
     publishDir "${params.outdir}/peaks", mode: 'copy'
 
     input:
-    tuple val(meta), path(bam)
+    // Aggiungiamo il path per l'indice (bai) qui
+    tuple val(meta), path(bam), path(bai)
 
     output:
     tuple val(meta), path("*.narrowPeak")      , emit: peaks
@@ -20,7 +21,7 @@ process MACS3_ATAC {
     """
     macs3 callpeak \\
         -t $bam \\
-        -f BAM \\
+        -f BAMPE \\
         -g hs \\
         -n $prefix \\
         -B \\
