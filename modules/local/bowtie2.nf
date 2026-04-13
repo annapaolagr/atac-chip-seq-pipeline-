@@ -19,10 +19,7 @@ process BOWTIE2 {
     # 1. Identifica la base dell'indice (Logica robusta stile nf-core)
     INDEX_BASE=`find -L ${index_dir} -name "*.1.bt2" | sed "s/\\.1\\.bt2\$//"`
 
-    # 2. Allineamento ottimizzato:
-    # --no-mixed --no-discordant: evita di generare allineamenti parziali "spazzatura"
-    # -F 4: scarta le reads non mappate (riduce drasticamente i 18GB di BAM)
-    # tee: scrive il log in tempo reale per monitorare l'avanzamento
+    # 2. Allineamento 
     bowtie2 \\
         -x \$INDEX_BASE \\
         -1 ${reads[0]} \\
