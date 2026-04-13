@@ -2,14 +2,11 @@ process MACS3_ATAC {
     tag "$meta.id"
     label 'process_medium'
     
-    // Usiamo il container ufficiale di MACS3
     container 'biocontainers/macs3:3.0.0b1-1_cv1'
 
-    // Pubblica i risultati nella cartella peaks
     publishDir "${params.outdir}/peaks", mode: 'copy'
 
     input:
-    // Riceve il file BAM ordinato e pulito
     tuple val(meta), path(bam)
 
     output:
