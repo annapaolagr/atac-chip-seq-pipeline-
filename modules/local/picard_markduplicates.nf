@@ -4,7 +4,7 @@ process PICARD_MARKDUPLICATES {
     publishDir "${params.outdir}/deduplicated", mode: 'copy'
 
     input:
-    tuple val(meta), path(bam) // Riceve il file da PICARD_ADDRG
+    tuple val(meta), path(bam) 
 
     output:
     tuple val(meta), path("*_removed.bam"), emit: bam
