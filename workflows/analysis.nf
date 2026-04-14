@@ -25,7 +25,7 @@ workflow ATAC_CHIP_PIPELINE {
     // Parametri: reads, index, save_unaligned (false), sort_bam (true)
     // Passiamo l'indice come richiesto dal modulo [meta_index, index] o solo path
     // Qui assumiamo che ch_index sia un semplice path come definito nel tuo workflow
-    BOWTIE2_ALIGN ( 
+    BOWTIE2 ( 
         TRIMGALORE.out.reads, 
         ch_index, 
         false, 
@@ -36,7 +36,7 @@ workflow ATAC_CHIP_PIPELINE {
     // 4. Rimozione Duplicati PCR + Creazione Indice (.bai) con Picard
     // Passiamo liste vuote per FASTA e FAI se non li stiamo usando
     PICARD_MARKDUPLICATES ( 
-        BOWTIE2_ALIGN.out.bam, 
+        BOWTIE2.out.bam, 
         [[:], []], 
         [[:], []] 
     )
