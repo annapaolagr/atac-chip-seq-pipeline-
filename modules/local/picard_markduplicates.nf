@@ -1,22 +1,47 @@
 process PICARD_MARKDUPLICATES {
     tag "$meta.id"
+    label 'process_medium'
     container 'broadinstitute/picard:2.27.4'
-    publishDir "${params.outdir}/deduplicated", mode: 'copy'
+    
+    publishDir "${params.outdir}/03_deduplicated", mode: 'copy'
 
     input:
-    tuple val(meta), path(bam) 
+    tuple val(meta), path(bam)
+    tuple val(meta2), path(fasta)
+    tuple val(meta3), path(fai)
 
     output:
-    tuple val(meta), path("*_removed.bam"), emit: bam
-    path "*.txt"                          , emit: metrics
+    tuple val(meta), path("*.bam"), emit: bam
+    tuple val(meta), path("*.bai"), emit: bai
+    tuple val(meta), path("*.metrics.txt"), emit: metrics
+    path  "versions.yml"                  , emit: versions
 
     script:
+    def args = task.ext.args ?: 'REMOVE_DUPLICATES=true ASSUME_SORTED=true VALIDATION_STRINGENCY=LENIENT CREATE_INDEX=true'
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    def suffix = task.ext.suffix ?: "${bam.getExtension()}"
+    def reference = fasta ? "--REFERENCE_SEQUENCE ${fasta}" : ""
+    
+    def avail_mem = 3072
+    if (!task.memory) {
+        log.info '[Picard MarkDuplicates] Available memory not known - defaulting to 3GB.'
+    } else {
+        avail_mem = (task.memory.mega*0.8).intValue()
+    }
+
     """
-    java -Xmx8g -jar /usr/picard/picard.jar MarkDuplicates \\
-        I=$bam \\
-        O=${meta.id}_removed.bam \\
-        M=${meta.id}_marked_dup_metrics.txt \\
-        REMOVE_DUPLICATES=true \\
-        VALIDATION_STRINGENCY=SILENT
+    picard \\
+        -Xmx${avail_mem}M \\
+        MarkDuplicates \\
+        $args \\
+        --INPUT $bam \\
+        --OUTPUT ${prefix}.${suffix} \\
+        $reference \\
+        --METRICS_FILE ${prefix}.MarkDuplicates.metrics.txt
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        picard: \$(echo \$(picard MarkDuplicates --version 2>&1) | grep -o 'Version:.*' | cut -f2- -d:)
+    END_VERSIONS
     """
 }
