@@ -2,7 +2,7 @@ process BOWTIE2 {
     tag "$meta.id"
     label 'process_high'
     // Manteniamo il tuo container Docker
-    container 'staphb/bowtie2:2.4.4'
+    container 'biocontainers/mulled-v2-ac74a7f02cebcfcc07d8e8d1d750af9c83b4d45a:f70b31a2db15c023d641c32f433fb02cd04df5a6-0'
 
     input:
     tuple val(meta) , path(reads)
@@ -56,13 +56,7 @@ process BOWTIE2 {
         2> >(tee ${prefix}.bowtie2.log >&2) \\
         | samtools $samtools_command $args2 --threads $task.cpus -o ${prefix}.bam -
 
-    # Rinominazione file non mappati (se presenti)
-    if [ -f ${prefix}.unmapped.fastq.1.gz ]; then
-        mv ${prefix}.unmapped.fastq.1.gz ${prefix}.unmapped_1.fastq.gz
-    fi
-    if [ -f ${prefix}.unmapped.fastq.2.gz ]; then
-        mv ${prefix}.unmapped.fastq.2.gz ${prefix}.unmapped_2.fastq.gz
-    fi
+    
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
