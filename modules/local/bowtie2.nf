@@ -31,6 +31,7 @@ process BOWTIE2 {
         --no-mixed \\
         --no-discordant \\
         2> >(tee ${prefix}.bowtie2.log >&2) | \\
+    samtools view -@ $st_cups -bS - | \\
     samtools fixmate -@ $st_cpus -m - - | \\
     samtools sort -@ $st_cpus -m 2G - | \\
     samtools markdup -@ $st_cpus -r - ${prefix}.removed.bam 
