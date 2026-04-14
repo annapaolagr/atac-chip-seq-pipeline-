@@ -1,4 +1,4 @@
-process BOWTIE2_ALIGN {
+process BOWTIE2 {
     tag "$meta.id"
     label 'process_high'
     // Manteniamo il tuo container Docker
