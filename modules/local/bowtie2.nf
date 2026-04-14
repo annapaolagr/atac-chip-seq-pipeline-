@@ -2,7 +2,7 @@ process BOWTIE2 {
     tag "$meta.id"
     label 'process_high'
     // Manteniamo il tuo container Docker
-    container 'biocontainers/mulled-v2-ac74a7f02cebcfcc07d8e8d1d750af9c83b4d45a:f70b31a2db15c023d641c32f433fb02cd04df5a6-0'
+    container 'quay.io/biocontainers/mulled-v2-ac74a7f02cebcfcc07d8e8d1d750af9c83b4d45a:f70b31a2db15c023d641c32f433fb02cd04df5a6-0'
 
     input:
     tuple val(meta) , path(reads)
