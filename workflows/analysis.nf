@@ -1,7 +1,7 @@
 // 1. Inclusione dei nuovi moduli aggiornati
 include { FASTQC }                 from '../modules/local/fastqc.nf'
 include { TRIMGALORE }             from '../modules/local/trimgalore.nf'
-include { BOWTIE2_ALIGN }          from '../modules/local/bowtie2.nf'
+include { BOWTIE2 }          from '../modules/local/bowtie2.nf'
 include { PICARD_MARKDUPLICATES }  from '../modules/local/picard_markduplicates.nf'
 include { MACS3_ATAC }             from '../modules/local/macs3_atac.nf'
 
