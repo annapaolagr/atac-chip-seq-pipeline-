@@ -14,8 +14,7 @@ process BOWTIE2 {
 
     script:
     def prefix = "${meta.id}_aln"
-    // Alziamo i core totali a 12 (8 per bowtie, 4 per samtools)
-    // Assicurati che nel nextflow.config il processo BOWTIE2 abbia cpus = 12
+ 
     def bt_cpus = 8
     def st_cpus = 4
 
