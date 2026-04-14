@@ -22,16 +22,14 @@ workflow ATAC_CHIP_PIPELINE {
     ch_versions = ch_versions.mix(TRIMGALORE.out.versions)
 
     // 3. Allineamento + Read Groups + Coordinate Sorting
-    // Parametri: reads, index, save_unaligned (false), sort_bam (true)
-    // Passiamo l'indice come richiesto dal modulo [meta_index, index] o solo path
-    // Qui assumiamo che ch_index sia un semplice path come definito nel tuo workflow
+    // 
     BOWTIE2 ( 
         TRIMGALORE.out.reads, 
         ch_index, 
         false, 
         true 
     )
-    ch_versions = ch_versions.mix(BOWTIE2_ALIGN.out.versions)
+    ch_versions = ch_versions.mix(BOWTIE2.out.versions)
 
     // 4. Rimozione Duplicati PCR + Creazione Indice (.bai) con Picard
     // Passiamo liste vuote per FASTA e FAI se non li stiamo usando
