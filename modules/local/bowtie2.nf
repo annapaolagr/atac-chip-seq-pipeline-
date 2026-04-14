@@ -19,7 +19,7 @@ process BOWTIE2 {
     def st_cpus = 2
 
     """
-    INDEX_BASE=`find -L ${index_dir} -name "*.1.bt2" | sed "s/\\.1\\.bt2\$//"`
+    INDEX_BASE=`find -L ${index_dir} -name "*.1.bt2" | sed "s/\\\\.1\\\\.bt2\\\$//"`
 
     bowtie2 \\
         -x \$INDEX_BASE \\
