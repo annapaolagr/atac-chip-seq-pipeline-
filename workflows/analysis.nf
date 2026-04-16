@@ -1,11 +1,14 @@
-// 1. Inclusione dei moduli (aggiunto MACS3_CHIP)
+// 1.
 include { FASTQC }                 from '../modules/local/fastqc.nf'
 include { TRIMGALORE }             from '../modules/local/trimgalore.nf'
 include { BOWTIE2 }                from '../modules/local/bowtie2.nf'
 include { SAMTOOLS_SORT }          from '../modules/local/samtools_sort.nf'
 include { PICARD_MARKDUPLICATES }  from '../modules/local/picard_markduplicates.nf'
 include { MACS3_ATAC }             from '../modules/local/macs3_atac.nf'
-include { MACS3_CHIP }             from '../modules/local/macs3_chip.nf'
+include { MACS3_CHIP_NARROW }      from '../modules/local/macs3_chip_narrow.nf'
+include { MACS3_CHIP_BROAD }       from '../modules/local/macs3_chip_broad.nf'
+
+
 
 workflow ATAC_CHIP_PIPELINE {
     take:
@@ -54,26 +57,37 @@ workflow ATAC_CHIP_PIPELINE {
         ch_peaks = MACS3_ATAC.out.peaks
         ch_versions = ch_versions.mix(MACS3_ATAC.out.versions)
 
-    } else if (params.protocol == 'chip') {
+} else if (params.protocol == 'chip') {
         
         // --- LOGICA CHIP-SEQ (ACCOPPIAMENTO IP vs INPUT) ---
         ch_bams = PICARD_MARKDUPLICATES.out.bam
 
-        // Identifichiamo i controlli (quelli con antibody 'none' o vuoto nel CSV)
+        // 1. Identifichiamo i controlli (Input/IgG)
+        // Creiamo una mappa [ ID_Controllo, File_BAM ]
         ch_control_bams = ch_bams
-            .filter { meta, bam -> meta.antibody == 'none' || !meta.antibody }
+            .filter { meta, bam -> meta.antibody == 'none' || !meta.antibody || meta.antibody == '' }
             .map { meta, bam -> [ meta.id, bam ] }
 
-        // Identifichiamo le IP e le uniamo ai rispettivi controlli
+        // 2. Identifichiamo le IP e le uniamo ai controlli tramite la colonna 'control' del CSV
         ch_macs3_chip_input = ch_bams
-            .filter { meta, bam -> meta.antibody && meta.antibody != 'none' }
-            .map { meta, bam -> [ meta.control, meta, bam ] } // chiave di join: meta.control
+            .filter { meta, bam -> meta.antibody && meta.antibody != 'none' && meta.antibody != '' }
+            .map { meta, bam -> [ meta.control, meta, bam ] } 
             .join(ch_control_bams)
             .map { id_ctrl, meta, bam_ip, bam_ctrl -> [ meta, bam_ip, bam_ctrl ] }
 
-        MACS3_CHIP ( ch_macs3_chip_input )
-        ch_peaks = MACS3_CHIP.out.peaks
-        ch_versions = ch_versions.mix(MACS3_CHIP.out.versions)
+        // 3. Lanciamo i due moduli in parallelo
+        MACS3_CHIP_NARROW ( ch_macs3_chip_input )
+        MACS3_CHIP_BROAD  ( ch_macs3_chip_input )
+
+        // 4. Raccogliamo i risultati
+        // Uniamo i picchi narrow e broad in un unico canale per l'emissione finale
+        ch_peaks = MACS3_CHIP_NARROW.out.peaks.mix(MACS3_CHIP_BROAD.out.peaks)
+        
+        // Uniamo le versioni dei software
+        ch_versions = ch_versions.mix(
+            MACS3_CHIP_NARROW.out.versions, 
+            MACS3_CHIP_BROAD.out.versions
+        )
     }
 
     emit:
