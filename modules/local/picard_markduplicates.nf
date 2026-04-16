@@ -1,7 +1,7 @@
 process PICARD_MARKDUPLICATES {
     tag "$meta.id"
     label 'process_medium'
-    container 'broadinstitute/picard:2.27.4'
+    container 'quay.io/biocontainers/picard:2.27.4--hdfd78af_0'
     
     publishDir "${params.outdir}/03_deduplicated", mode: 'copy'
 
