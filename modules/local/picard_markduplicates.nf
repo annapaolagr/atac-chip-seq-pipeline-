@@ -11,13 +11,14 @@ process PICARD_MARKDUPLICATES {
     tuple val(meta3), path(fai)
 
     output:
-    tuple val(meta), path("*.removed.bam")        , emit: bam
-    tuple val(meta), path("*.{bai,bam.bai}")    , emit: bai
+    tuple val(meta), path("*.removed.bam")       , emit: bam
+    tuple val(meta), path("*.{bai,bam.bai}")    , emit: bai, optional: true
     tuple val(meta), path("*.metrics.txt")      , emit: metrics
     path  "versions.yml"                        , emit: versions
 
     script:
-    def args = task.ext.args ?: 'REMOVE_DUPLICATES=true ASSUME_SORTED=true VALIDATION_STRINGENCY=LENIENT CREATE_INDEX=true'
+    
+    def args = task.ext.args ?: '--REMOVE_DUPLICATES true --ASSUME_SORTED true --VALIDATION_STRINGENCY LENIENT --CREATE_INDEX true'
     def prefix = task.ext.prefix ?: "${meta.id}"
     def reference = fasta ? "--REFERENCE_SEQUENCE ${fasta}" : ""
     
