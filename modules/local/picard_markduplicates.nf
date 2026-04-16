@@ -11,7 +11,7 @@ process PICARD_MARKDUPLICATES {
     tuple val(meta3), path(fai)
 
     output:
-    tuple val(meta), path("*.dedup.bam")        , emit: bam
+    tuple val(meta), path("*.removed.bam")        , emit: bam
     tuple val(meta), path("*.{bai,bam.bai}")    , emit: bai
     tuple val(meta), path("*.metrics.txt")      , emit: metrics
     path  "versions.yml"                        , emit: versions
@@ -34,7 +34,7 @@ process PICARD_MARKDUPLICATES {
         MarkDuplicates \\
         $args \\
         --INPUT $bam \\
-        --OUTPUT ${prefix}.dedup.bam \\
+        --OUTPUT ${prefix}.removed.bam \\
         --METRICS_FILE ${prefix}.MarkDuplicates.metrics.txt \\
         $reference
 
