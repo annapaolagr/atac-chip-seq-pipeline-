@@ -4,7 +4,8 @@ include { TRIMGALORE }             from '../modules/local/trimgalore.nf'
 include { BOWTIE2 }                from '../modules/local/bowtie2.nf'
 include { SAMTOOLS_SORT }          from '../modules/local/samtools_sort.nf'
 include { PICARD_MARKDUPLICATES }  from '../modules/local/picard_markduplicates.nf'
-include { MACS3_ATAC }             from '../modules/local/macs3_atac.nf'
+include { MACS3_ATAC_NARROW } from '../modules/local/macs3_atac_narrow.nf'
+include { MACS3_ATAC_BROAD }  from '../modules/local/macs3_atac_broad.nf'
 include { MACS3_CHIP_NARROW }      from '../modules/local/macs3_chip_narrow.nf'
 include { MACS3_CHIP_BROAD }       from '../modules/local/macs3_chip_broad.nf'
 
@@ -49,15 +50,19 @@ workflow ATAC_CHIP_PIPELINE {
 
     ch_peaks = Channel.empty()
 
-    if (params.protocol == 'atac') {
+if (params.protocol == 'atac') {
         
-        // --- LOGICA ATAC-SEQ ---
-        // MACS3_ATAC riceve direttamente il BAM deduplicato
-        MACS3_ATAC ( PICARD_MARKDUPLICATES.out.bam )
-        ch_peaks = MACS3_ATAC.out.peaks
-        ch_versions = ch_versions.mix(MACS3_ATAC.out.versions)
+      MACS3_ATAC_NARROW ( ch_final_bams )
+        MACS3_ATAC_BROAD  ( ch_final_bams )
 
-} else if (params.protocol == 'chip') {
+        ch_peaks = MACS3_ATAC_NARROW.out.peaks.mix(MACS3_ATAC_BROAD.out.peaks)
+        ch_versions = ch_versions.mix(
+            MACS3_ATAC_NARROW.out.versions, 
+            MACS3_ATAC_BROAD.out.versions
+        )
+    }
+
+else if (params.protocol == 'chip') {
         
         // --- LOGICA CHIP-SEQ (ACCOPPIAMENTO IP vs INPUT) ---
         ch_bams = PICARD_MARKDUPLICATES.out.bam
