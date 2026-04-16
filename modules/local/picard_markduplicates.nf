@@ -3,7 +3,7 @@ process PICARD_MARKDUPLICATES {
     label 'process_medium'
     container 'quay.io/biocontainers/picard:2.27.4--hdfd78af_0'
     
-    publishDir "${params.outdir}/04_deduplicated", mode: 'copy'
+    publishDir "${params.outdir}/04_Removed", mode: 'copy'
 
     input:
     tuple val(meta), path(bam)
