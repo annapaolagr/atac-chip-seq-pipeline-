@@ -5,29 +5,34 @@ process BOWTIE2 {
 
     input:
     tuple val(meta), path(reads)
-    path  index // La cartella dell'indice
+    path index // La cartella dell'indice (passata come canale collect)
 
     output:
     tuple val(meta), path("*.raw.bam"), emit: bam
-    tuple val(meta), path("*.log")    , emit: log
-    path "versions.yml"               , emit: versions
+    tuple val(meta), path("*.log")     , emit: log
+    path "versions.yml"                , emit: versions
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
-    // Aggiungiamo i Read Groups qui per non doverlo fare dopo
     def rg_args = "--rg-id ${prefix} --rg SM:${prefix} --rg PL:ILLUMINA --rg LB:lib1"
     
+    // Logica per gestire Single-End vs Paired-End
+    def input_reads = meta.single_end ? "-U ${reads}" : "-1 ${reads[0]} -2 ${reads[1]}"
+    
+    // Aggiungiamo flag specifici per ATAC se necessario (opzionale, basato sui tuoi params)
+    def extra_args = params.protocol == 'atac' ? "--no-mixed --no-discordant" : ""
+
     """
-    # Trova la base dell'indice in modo robusto
-    INDEX_BASE=\$(find -L . -name "*.1.bt2" | sed 's/\\.1\\.bt2//' | head -n 1)
+    # Trova la base dell'indice in modo robusto (cerca file .1.bt2 o .1.bt2l per indici grandi)
+    INDEX_BASE=\$(find -L . -name "*.1.bt2*" | sed 's/\\.1\\.bt2.*//' | head -n 1)
 
     bowtie2 \\
         -x \$INDEX_BASE \\
-        -1 ${reads[0]} \\
-        -2 ${reads[1]} \\
+        $input_reads \\
         -p $task.cpus \\
         $rg_args \\
         --very-sensitive \\
+        $extra_args \\
         -X 2000 \\
         2> ${prefix}.bowtie2.log \\
         | samtools view -@ $task.cpus -b > ${prefix}.raw.bam
