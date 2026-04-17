@@ -14,7 +14,7 @@ process MACS3_CHIP_BROAD {
     script:
     def prefix = "${meta.id}_broad"
     def format = meta.single_end ? 'BAM' : 'BAMPE'
-    def genome = params.genome == 'hg38' || params.genome == 'hg19' ? 'hs' : 'mm'
+    def m_genome = (params.genome == 'hg38') ? 'hs' : params.genome
     """
     macs3 callpeak \\
         -t $ip_bam \\
