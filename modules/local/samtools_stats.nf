@@ -2,7 +2,7 @@ process SAMTOOLS_STATS {
     tag "$meta.id"
     label 'process_low'
 
-    container 'quay.io/biocontainers/samtools:1.17--h00c71de_0'
+    container 'quay.io/biocontainers/samtools:1.20--h50ea8bc_0'
 
     input:
     tuple val(meta), path(bam)
