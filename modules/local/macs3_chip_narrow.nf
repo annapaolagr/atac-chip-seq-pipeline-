@@ -1,7 +1,7 @@
 process MACS3_CHIP_NARROW {
     tag "$meta.id"
     label 'process_medium'
-    container 'quay.io/biocontainers/macs3:3.0.0b3--py310h0353cde_0'
+    container 'quay.io/biocontainers/macs3:3.0.1--py311h0152c62_3'
 
     input:
     tuple val(meta), path(ip_bam), path(control_bam)
