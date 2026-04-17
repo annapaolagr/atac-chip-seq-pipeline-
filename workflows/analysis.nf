@@ -1,13 +1,9 @@
-/*
-========================================================================================
-    IMPORT MODULI
-========================================================================================
-*/
+
 include { FASTQC }                 from '../modules/local/fastqc.nf'
 include { TRIMGALORE }             from '../modules/local/trimgalore.nf'
 include { BOWTIE2 }                from '../modules/local/bowtie2.nf'
 include { SAMTOOLS_SORT }          from '../modules/local/samtools_sort.nf'
-include { SAMTOOLS_STATS }         from '../modules/local/samtools_stats.nf' // AGGIUNTO
+include { SAMTOOLS_STATS }         from '../modules/local/samtools_stats.nf' 
 include { PICARD_MARKDUPLICATES }  from '../modules/local/picard_markduplicates.nf'
 include { FILTERING }              from '../modules/local/filtering.nf'
 include { MACS3_ATAC_NARROW }      from '../modules/local/macs3_atac_narrow.nf'
@@ -15,9 +11,9 @@ include { MACS3_ATAC_BROAD }       from '../modules/local/macs3_atac_broad.nf'
 include { MACS3_CHIP_NARROW }      from '../modules/local/macs3_chip_narrow.nf'
 include { MACS3_CHIP_BROAD }       from '../modules/local/macs3_chip_broad.nf'
 include { HOMER_ANNOTATEPEAKS }    from '../modules/local/homer_annotate.nf'
-include { CALC_FRIP }              from '../modules/local/calc_frip.nf'       // AGGIUNTO
-include { DEEPTOOLS_BAMCOVERAGE }  from '../modules/local/deeptools.nf'      // AGGIUNTO
-include { MULTIQC }                from '../modules/local/multiqc.nf'        // AGGIUNTO
+include { CALC_FRIP }              from '../modules/local/calc_frip.nf'      
+include { DEEPTOOLS_BAMCOVERAGE }  from '../modules/local/deeptools.nf'      
+include { MULTIQC }                from '../modules/local/multiqc.nf'        
 
 workflow ATAC_CHIP_PIPELINE {
     take:
@@ -26,9 +22,8 @@ workflow ATAC_CHIP_PIPELINE {
 
     main:
     ch_versions = Channel.empty()
-    ch_multiqc_files = Channel.empty()
 
-    // 1. Controllo Qualità iniziale
+    // 1. Qualità iniziale
     FASTQC ( ch_input )
     ch_versions = ch_versions.mix(FASTQC.out.versions)
 
@@ -43,11 +38,11 @@ workflow ATAC_CHIP_PIPELINE {
     // 4. Ordinamento
     SAMTOOLS_SORT ( BOWTIE2.out.bam )
 
-    // 5. Rimozione Duplicati
+    // 5. Duplicati
     PICARD_MARKDUPLICATES ( SAMTOOLS_SORT.out.bam, [], [] )
     ch_versions = ch_versions.mix(PICARD_MARKDUPLICATES.out.versions)
 
-    // 6. Filtraggio (Blacklist e Mitocondri)
+    // 6. Filtraggio
     def blacklist_path = params.genomes[ params.genome ]?.blacklist ?: null
     if (blacklist_path) {
         ch_blacklist = file(blacklist_path) 
@@ -58,23 +53,22 @@ workflow ATAC_CHIP_PIPELINE {
         ch_final_bams = PICARD_MARKDUPLICATES.out.bam
     }
 
-    // 7. Statistiche Allineamento (Samtools Stats per MultiQC)
+    // 7. Statistiche Allineamento
     SAMTOOLS_STATS ( ch_final_bams )
     ch_versions = ch_versions.mix(SAMTOOLS_STATS.out.versions)
 
-    // 8. Generazione BigWig (DeepTools)
+    // 8. DeepTools (BigWig)
     DEEPTOOLS_BAMCOVERAGE ( ch_final_bams )
 
     // 9. Peak Calling
     ch_peaks = Channel.empty()
-    ch_frip_peaks = Channel.empty() // Canale specifico per calcolare la FRiP
+    ch_frip_peaks = Channel.empty() 
 
     if (params.protocol == 'atac') {
         MACS3_ATAC_NARROW ( ch_final_bams )
         MACS3_ATAC_BROAD  ( ch_final_bams )
-        
         ch_peaks = MACS3_ATAC_NARROW.out.peaks.mix(MACS3_ATAC_BROAD.out.peaks)
-        ch_frip_peaks = MACS3_ATAC_NARROW.out.peaks // Usiamo i narrow per la FRiP
+        ch_frip_peaks = MACS3_ATAC_NARROW.out.peaks 
         ch_versions = ch_versions.mix(MACS3_ATAC_NARROW.out.versions, MACS3_ATAC_BROAD.out.versions)
     } 
     else if (params.protocol == 'chip') {
@@ -90,37 +84,39 @@ workflow ATAC_CHIP_PIPELINE {
 
         MACS3_CHIP_NARROW ( ch_macs3_chip_input )
         MACS3_CHIP_BROAD  ( ch_macs3_chip_input )
-
         ch_peaks = MACS3_CHIP_NARROW.out.peaks.mix(MACS3_CHIP_BROAD.out.peaks)
         ch_frip_peaks = MACS3_CHIP_NARROW.out.peaks
         ch_versions = ch_versions.mix(MACS3_CHIP_NARROW.out.versions, MACS3_CHIP_BROAD.out.versions)
     }
 
-    // 10. Calcolo FRiP
+    // 10. FRiP
     ch_frip_input = ch_final_bams.join(ch_frip_peaks)
     CALC_FRIP ( ch_frip_input )
 
-    // 11. Annotazione con HOMER
+    // 11. Annotazione
     def fasta = params.genomes[ params.genome ]?.fasta ?: null
     def gtf   = params.genomes[ params.genome ]?.gtf   ?: null
-
     if (fasta && gtf) {
         HOMER_ANNOTATEPEAKS ( ch_peaks, file(fasta), file(gtf) )
         ch_versions = ch_versions.mix(HOMER_ANNOTATEPEAKS.out.versions)
     }
 
-    // 12. Raccolta file per MULTIQC
-    ch_multiqc_files = ch_multiqc_files.mix(
+    // --- 12. MULTIQC ---
+    // Prepariamo il file config se fornito, altrimenti canale vuoto
+    ch_multiqc_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
+
+
+    MULTIQC (
+        ch_multiqc_config.collect().ifEmpty([]),
         FASTQC.out.zip.map{ it[1] }.collect().ifEmpty([]),
         TRIMGALORE.out.log.map{ it[1] }.collect().ifEmpty([]),
         BOWTIE2.out.log.map{ it[1] }.collect().ifEmpty([]),
         PICARD_MARKDUPLICATES.out.metrics.map{ it[1] }.collect().ifEmpty([]),
         SAMTOOLS_STATS.out.stats.map{ it[1] }.collect().ifEmpty([]),
+        ch_peaks.map{ it[1] }.collect().ifEmpty([]),           // MACS3 logs
         CALC_FRIP.out.summary.map{ it[1] }.collect().ifEmpty([]),
-        ch_versions.unique().collect().ifEmpty([])
+        ch_versions.unique().collect()
     )
-
-    MULTIQC ( ch_multiqc_files.collect() )
 
     emit:
     bam      = ch_final_bams
