@@ -13,7 +13,7 @@ process MACS3_ATAC_BROAD {
     script:
     def prefix = "${meta.id}_atac_broad"
     def format = meta.single_end ? 'BAM' : 'BAMPE'
-    def genome = params.genome == 'hg38' || params.genome == 'hg19' ? 'hs' 
+    def m_genome = (params.genome == 'hg38') ? 'hs' : params.genome
     """
     macs3 callpeak \\
         -t $bam \\
