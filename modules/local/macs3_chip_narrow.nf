@@ -15,6 +15,7 @@ process MACS3_CHIP_NARROW {
     def prefix = "${meta.id}_narrow"
     def format = meta.single_end ? 'BAM' : 'BAMPE'
     def m_genome = (params.genome == 'hg38') ? 'hs' : params.genome
+"""
     macs3 callpeak \\
         -t $ip_bam \\
         -c $control_bam \\
@@ -22,6 +23,8 @@ process MACS3_CHIP_NARROW {
         -g $genome \\
         -n $prefix \\
         --qvalue 0.05
+"""
+
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
