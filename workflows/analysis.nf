@@ -102,20 +102,32 @@ workflow ATAC_CHIP_PIPELINE {
     }
 
     // --- 12. MULTIQC ---
-    // Prepariamo il file config se fornito, altrimenti canale vuoto
-    ch_multiqc_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
+    // --- 12. MULTIQC ---
+    
+    // Creazione del sommario (Genoma, Protocollo, etc.)
+    def summary_info = """
+    Pipeline Configuration:
+    - Protocol: ${params.protocol.toUpperCase()}
+    - Genome:   ${params.genome}
+    - Input:    ${params.input}
+    - Outdir:   ${params.outdir}
+    """.stripIndent()
+    
+    // Trasforma la stringa in un file che MultiQC può leggere
+    def ch_workflow_summary = Channel.value(summary_info).collectFile(name: 'workflow_summary_mqc.txt')
 
-
+    // Chiamata al modulo MULTIQC
     MULTIQC (
         ch_multiqc_config.collect().ifEmpty([]),
+        ch_workflow_summary,
         FASTQC.out.zip.map{ it[1] }.collect().ifEmpty([]),
         TRIMGALORE.out.log.map{ it[1] }.collect().ifEmpty([]),
         BOWTIE2.out.log.map{ it[1] }.collect().ifEmpty([]),
         PICARD_MARKDUPLICATES.out.metrics.map{ it[1] }.collect().ifEmpty([]),
         SAMTOOLS_STATS.out.stats.map{ it[1] }.collect().ifEmpty([]),
-        ch_peaks.map{ it[1] }.collect().ifEmpty([]),           // MACS3 logs
+        ch_peaks.map{ it[1] }.collect().ifEmpty([]),            // Logs di MACS3
         CALC_FRIP.out.summary.map{ it[1] }.collect().ifEmpty([]),
-        ch_versions.unique().collect()
+        ch_versions.unique().collect().ifEmpty([])             // Versioni software
     )
 
     emit:
