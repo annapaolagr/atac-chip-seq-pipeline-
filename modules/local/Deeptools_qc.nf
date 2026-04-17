@@ -1,7 +1,7 @@
 process DEEPTOOLS_QC {
     tag "$meta.id"
     label 'process_high' // DeepTools (soprattutto computeMatrix) mangia molta RAM
-    container 'quay.io/biocontainers/deeptools:3.5.1--py_0'
+    container 'quay.io/biocontainers/deeptools:3.5.5--pyhdfd78af_0'
     
     publishDir "${params.outdir}/07_advanced_qc", mode: 'copy'
 
