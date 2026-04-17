@@ -3,9 +3,7 @@ process FILTERING {
     label 'process_medium'
     
     // Questo container contiene bedtools, necessario per l'intersect
-    container 'quay.io/biocontainers/bedtools:2.31.1--hf5e1d6e_0'
-
-// se quello di sopra non funziona biocontainers/bedtools:2.30.0--hc088bd4_0'
+    container 'quay.io/biocontainers/bedtools:2.30.0--hc088bd4_0'
 
     publishDir "${params.outdir}/04_filtered", mode: 'copy'
 
