@@ -1,20 +1,20 @@
 process MULTIQC {
     label 'process_medium'
-
     container "biocontainers/multiqc:1.23--pyhdfd78af_0"
 
     publishDir "${params.outdir}/00_MultiQC", mode: 'copy'
 
     input:
-    path multiqc_config
-    path ('fastqc/*')
-    path ('trimgalore/*')
-    path ('alignment/*')
-    path ('picard/*')
-    path ('samtools/*')
-    path ('macs3/*')
-    path ('frip/*')
-    path versions
+    path multiqc_config      // 1. Configurazione estetica
+    path workflow_summary    // 2. Info Genoma/Protocollo (Aggiunto qui!)
+    path ('fastqc/*')        // 3.
+    path ('trimgalore/*')    // 4.
+    path ('alignment/*')     // 5.
+    path ('picard/*')        // 6.
+    path ('samtools/*')      // 7.
+    path ('macs3/*')         // 8.
+    path ('frip/*')          // 9.
+    path versions           // 10. Versioni software
 
     output:
     path "*multiqc_report.html", emit: report
@@ -23,7 +23,7 @@ process MULTIQC {
 
     script:
     def args = task.ext.args ?: ''
-    def config = multiqc_config ? "--config $multiqc_config" : ''
+    def config = multiqc_config.name != 'empty_config' ? "--config $multiqc_config" : ''
     """
     multiqc \\
         -f \\
