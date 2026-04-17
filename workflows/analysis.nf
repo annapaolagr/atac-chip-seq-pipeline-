@@ -37,18 +37,20 @@ workflow ATAC_CHIP_PIPELINE {
     PICARD_MARKDUPLICATES ( SAMTOOLS_SORT.out.bam, [], [] )
     ch_versions = ch_versions.mix(PICARD_MARKDUPLICATES.out.versions)
 
-    // --- STEP 6: FILTRAGGIO (Blacklist + Mito se ATAC) ---
-    // Recuperiamo la blacklist dal config igenomes
-    def blacklist_path = params.genomes[ params.genome ]?.blacklist ?: null
-    ch_blacklist = blacklist_path ? file(blacklist_path, checkIfExists: true) : []
+    // --- STEP 6: FILTRAGGIO ---
+def blacklist_path = params.genomes[ params.genome ]?.blacklist ?: null
 
-    if (blacklist_path) {
-        FILTERING ( PICARD_MARKDUPLICATES.out.bam, ch_blacklist )
-        ch_final_bams = FILTERING.out.bam
-        ch_versions = ch_versions.mix(FILTERING.out.versions)
-    } else {
-        ch_final_bams = PICARD_MARKDUPLICATES.out.bam
-    }
+if (blacklist_path) {
+    // Rimuoviamo 'checkIfExists: true' perché con gli URL remoti può dare problemi al primo avvio
+    // Nextflow scaricherà l'URL e lo passerà al processo
+    ch_blacklist = file(blacklist_path) 
+
+    FILTERING ( PICARD_MARKDUPLICATES.out.bam, ch_blacklist )
+    ch_final_bams = FILTERING.out.bam
+    ch_versions = ch_versions.mix(FILTERING.out.versions)
+} else {
+    ch_final_bams = PICARD_MARKDUPLICATES.out.bam
+}
 
     // --- STEP 7: PEAK CALLING ---
     ch_peaks = Channel.empty()
