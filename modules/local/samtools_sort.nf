@@ -1,7 +1,7 @@
 process SAMTOOLS_SORT {
     tag "$meta.id"
     label 'process_medium'
-    container 'quay.io/biocontainers/samtools:1.19.2--h50ea8bc_1'
+    container 'quay.io/biocontainers/samtools:1.20--h50ea8bc_0'
 
     input:
     tuple val(meta), path(raw_bam)
