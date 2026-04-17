@@ -2,7 +2,7 @@ process CALC_FRIP {
     tag "$meta.id"
     label 'process_medium'
 
-    container 'quay.io/biocontainers/subread:2.0.1--h7d7f7ad_1'
+    container 'quay.io/biocontainers/subread:2.0.1--hed695b0_0'
 
     input:
     tuple val(meta), path(bam), path(peak)
