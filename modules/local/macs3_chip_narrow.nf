@@ -23,7 +23,6 @@ process MACS3_CHIP_NARROW {
         -g $genome \\
         -n $prefix \\
         --qvalue 0.05
-"""
 
 
     cat <<-END_VERSIONS > versions.yml
