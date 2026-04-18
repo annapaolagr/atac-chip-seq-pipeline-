@@ -58,7 +58,7 @@ workflow ATAC_CHIP_PIPELINE {
     ch_versions = ch_versions.mix(SAMTOOLS_STATS.out.versions)
 
     // 8. DeepTools (BigWig)
-    DEEPTOOLS_BAMCOVERAGE ( ch_final_bams )
+    DEEPTOOLS ( ch_final_bams )
 
     // 9. Peak Calling
     ch_peaks = Channel.empty()
@@ -101,7 +101,6 @@ workflow ATAC_CHIP_PIPELINE {
         ch_versions = ch_versions.mix(HOMER_ANNOTATEPEAKS.out.versions)
     }
 
-    // --- 12. MULTIQC ---
     // --- 12. MULTIQC ---
     
     // Creazione del sommario (Genoma, Protocollo, etc.)
