@@ -43,16 +43,18 @@ nextflow run annapaolagr/atac-chip-seq-pipeline- \
 
 The workflow performs the following steps:
 
-1.  **Quality Control**: Raw read quality control ([FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)).
-2.  **Trimming**: Removal of adapters and low-quality bases ([Trim Galore\!](https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/)).
-3.  **Alignment**: Read mapping to the reference genome ([Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)).
-4.  **Duplicates Management**: Identification and removal of duplicates ([Picard MarkDuplicates](https://broadinstitute.github.io/picard/)).
-5.  **Filtering**: Removal of reads mapped to blacklisted regions, non-primary alignments, or reads with low mapping quality ([SAMtools](http://www.htslib.org/)).
-6.  **BigWig Generation**: Creation of normalized files (RPKM) for visualization on IGV ([deepTools](https://deeptools.readthedocs.io/)).
-7.  **Peak Calling**: Identification of enriched regions (Narrow/Broad) ([MACS3](https://github.com/macs3-project/MACS)).
-8.  **Annotation**: Peak annotation relative to gene features ([HOMER](http://homer.ucsd.edu/homer/)).
-9.  **QC Metrics**: Calculation of the Fraction of Reads in Peaks (FRiP score).
-10. **MultiQC**: Generation of a final interactive report with statistics from every step ([MultiQC](https://multiqc.info/)).
+1.  **Quality Control**: Raw read quality control using [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/).
+2.  **Trimming**: Removal of adapters and low-quality bases with [Trim Galore!](https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/).
+3.  **Alignment**: Read mapping to the reference genome via [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml).
+4.  **Alignment Management**: Processing, sorting, and indexing BAM files using [SAMtools](http://www.htslib.org/).
+5.  **Duplicates Management**: Identification and removal of PCR duplicates with [Picard MarkDuplicates](https://broadinstitute.github.io/picard/).
+6.  **Blacklist Removal**: Filtering out reads overlapping problematic genomic regions using [BEDTools](https://bedtools.readthedocs.io/).
+7.  **Quality Metrics & Statistics**: Generating comprehensive alignment statistics with [SAMtools stats](http://www.htslib.org/doc/samtools-stats.html).
+8.  **Enrichment Analysis**: Generating Fingerprint and Profile plots to assess IP strength using [deepTools](https://deeptools.readthedocs.io/).
+9.  **Peak Calling**: Identification of enriched genomic regions (Narrow/Broad) with [MACS3](https://github.com/macs3-project/MACS).
+10. **Annotation**: Functional annotation of peaks relative to gene features using [HOMER](http://homer.ucsd.edu/homer/).
+11. **QC Metrics**: Calculation of the Fraction of Reads in Peaks (FRiP score).
+12. **MultiQC**: Compilation of an interactive report aggregating stats from all steps using [MultiQC](https://multiqc.info/).
 
 -----
 
