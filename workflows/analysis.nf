@@ -12,7 +12,7 @@ include { MACS3_CHIP_NARROW }      from '../modules/local/macs3_chip_narrow.nf'
 include { MACS3_CHIP_BROAD }       from '../modules/local/macs3_chip_broad.nf'
 include { HOMER_ANNOTATEPEAKS }    from '../modules/local/homer_annotate.nf'
 include { CALC_FRIP }              from '../modules/local/calc_frip.nf'      
-include { DEEPTOOLS_BAMCOVERAGE }  from '../modules/local/deeptools.nf'      
+include { DEEPTOOLS }  from '../modules/local/deeptools.nf'      
 include { MULTIQC }                from '../modules/local/multiqc.nf'        
 
 workflow ATAC_CHIP_PIPELINE {
