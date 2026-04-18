@@ -1,7 +1,5 @@
 # atac-chip-seq-pipeline-
 
-Ecco una versione completa, professionale e "pulita" del tuo `README.md`, scritta seguendo gli standard di **nf-core**. Ho incluso il tuo comando specifico e tutte le sezioni che abbiamo discusso.
-
 -----
 
 # 🧬 ATAC & ChIP-seq Analysis Pipeline
